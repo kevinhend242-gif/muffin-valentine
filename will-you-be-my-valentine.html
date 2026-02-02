@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Will you be my Valentine?</title>
+  <style>
+    :root{
+      --bg:#FFF6F9; --card:#fff; --accent:#ff6b9a; --accent-2:#ffb3c7;
+      --muted:#6b6b6b; --neutral:#f7f7f7; --radius:18px;
+    }
+    html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:
+      radial-gradient(800px 400px at 10% 10%, #fff0f3 0%, transparent 12%),
+      var(--bg); color:#222; display:flex; align-items:center; justify-content:center; padding:20px;}
+    .card{width:100%;max-width:780px;background:var(--card);border-radius:var(--radius);box-shadow:0 10px 30px rgba(17,17,17,0.08);padding:20px;}
+    .header{text-align:center}
+    .title{font-family: "Pacifico", system-ui, serif; font-size:36px;color:var(--accent);margin:6px 0}
+    .subtitle{color:var(--muted);margin:0 0 12px}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:12px}
+    select{padding:8px 10px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);background:var(--neutral)}
+    .btn{border:0;padding:10px 14px;border-radius:999px;cursor:pointer}
+    .btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#fff}
+    .preview{background:linear-gradient(180deg,#fff 0%, #fff6fb 100%);padding:12px;border-radius:12px;box-shadow:0 6px 18px rgba(17,17,17,0.04);margin-bottom:12px}
+    .preview-text{white-space:pre-wrap;color:#444;line-height:1.4}
+    .open-row{text-align:center;margin-top:10px}
+    .surprise{display:none;padding:14px;border-radius:12px;background:linear-gradient(180deg,#fff 0%, #fff6fb 100%);box-shadow:0 6px 18px rgba(17,17,17,0.04);text-align:center}
+    .message h2{color:var(--accent);margin:6px 0;font-size:24px}
+    .message p{white-space:pre-wrap;color:#333;line-height:1.45}
+    .response-row{display:flex;gap:12px;justify-content:center;align-items:center;position:relative;height:70px;margin-top:12px}
+    .response-row .btn.large{padding:12px 18px;font-size:16px;border-radius:14px}
+    .btn.neutral{background:var(--neutral);color:#333;border:1px solid rgba(0,0,0,0.06)}
+    .lily{position:absolute;right:18px;top:12px;opacity:.98;pointer-events:none}
+    canvas{position:fixed;left:0;top:0;width:100vw;height:100vh;pointer-events:none;z-index:9999}
+    @media (max-width:480px){ .title{font-size:30px} .card{padding:16px} .response-row{height:90px} }
+  </style>
+</head>
+<body>
+  <div class="card" role="main" aria-labelledby="mainTitle">
+    <div class="lily" aria-hidden="true">
+      <!-- simple lily SVG -->
+      <svg viewBox="0 0 120 120" width="72" height="72">
+        <g fill="none" stroke="none">
+          <path d="M60 8c6 0 12 9 12 15 0 10-12 22-12 22s-12-12-12-22c0-6 6-15 12-15z" fill="#ffdbe6"/>
+          <path d="M60 20c5 0 10 7 10 11 0 8-10 18-10 18s-10-10-10-18c0-4 5-11 10-11z" fill="#ff9acb"/>
+          <path d="M60 44c3 0 6 4 6 6 0 4-6 9-6 9s-6-5-6-9c0-2 3-6 6-6z" fill="#ff6b9a"/>
+          <rect x="56" y="52" width="8" height="40" rx="4" fill="#8bd3a6"/>
+        </g>
+      </svg>
+    </div>
+
+    <header class="header">
+      <h1 id="mainTitle" class="title">Will you be my Valentine?</h1>
+      <p class="subtitle">A little surprise for you, <strong id="herName">Muffin</strong> 💌</p>
+    </header>
+
+    <div class="controls" aria-label="Message selection">
+      <label for="messageSelect" class="sr-only" style="position:absolute;left:-9999px">Choose message</label>
+      <select id="messageSelect" aria-label="Choose message">
+        <option value="short">Short & sweet</option>
+        <option value="poem">Little poem</option>
+        <option value="pun">Playful / punny</option>
+        <option value="personal">Cute & personal</option>
+        <option value="funny">Funny + heartfelt</option>
+        <option value="printable">Printable card text</option>
+        <option value="micro">Micro-story</option>
+        <option value="lily">Lily love</option>
+      </select>
+      <button id="previewBtn" class="btn primary" aria-expanded="true">Preview</button>
+    </div>
+
+    <div id="preview" class="preview" aria-live="polite">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <strong id="previewTitle">Short & sweet</strong>
+      </div>
+      <p id="previewText" class="preview-text">Will you be my Valentine? ❤️ Because every day with you feels like my favorite day.</p>
+      <div class="open-row"><button id="openBtn" class="btn primary">Open for Muffin</button></div>
+    </div>
+
+    <div id="surprise" class="surprise" aria-hidden="true">
+      <div class="message">
+        <h2>To <span id="herName2">Muffin</span> ❤️</h2>
+        <p id="messageText">You make ordinary moments sparkle and every day feel like an adventure. I’d be the luckiest if you’d be my Valentine.</p>
+        <p style="margin-top:10px;color:var(--muted)">— <span id="yourName">Kevin</span></p>
+      </div>
+
+      <div class="response-row" aria-hidden="false">
+        <button id="yesBtn" class="btn primary large" type="button">Yes, of course!</button>
+        <button id="noBtn" class="btn neutral large" type="button">No... wait</button>
+      </div>
+    </div>
+  </div>
+
+  <canvas id="confettiCanvas" aria-hidden="true"></canvas>
+
+  <script>
+    // --- Customize names here ---
+    const HER_NAME = "Muffin";
+    const YOUR_NAME = "Kevin";
+
+    const MESSAGES = {
+      short: { title: "Short & sweet", text: "Will you be my Valentine? ❤️\nBecause every day with you feels like my favorite day." },
+      poem: { title: "Little poem", text: "Roses are red, violets are fine,\nEverything is better — will you be my Valentine?\nYou light my days in the gentlest way,\nSay yes and make my whole year, please say." },
+      pun: { title: "Playful / punny", text: "I donut know what I’d do without you. 🍩\nWill you be my Valentine?" },
+      personal: { title: "Cute & personal", text: HER_NAME + ", you make ordinary moments sparkle.\nFrom late-night laughs to cozy mornings, I love everything about you.\nWill you be my Valentine?" },
+      funny: { title: "Funny + heartfelt", text: "I promise to share my fries, laugh at your terrible puns, and always let you pick the movie.\nSo… will you be my Valentine? (Also — I’ll bring dessert.) 😄❤️" },
+      printable: { title: "Printable card text", text: "To the one who makes my heart skip, laugh, and feel at home —\nI’d be the luckiest person if you’d be my Valentine.\nLove, " + YOUR_NAME },
+      micro: { title: "Micro-story", text: "Once upon a moment, I found a laugh that matched mine, a hand that fit perfectly in mine, and a person who turned ordinary days into tiny adventures. That person is you. Will you be my Valentine?" },
+      lily: { title: "Lily love", text: HER_NAME + ", like your favorite lily blooming in spring, you bring beauty and calm to everything around you. Will you be my Valentine?" }
+    };
+
+    // Elements
+    const herNameEls = document.querySelectorAll('#herName,#herName2');
+    herNameEls.forEach(e => e.textContent = HER_NAME);
+    document.getElementById('yourName').textContent = YOUR_NAME;
+
+    const select = document.getElementById('messageSelect');
+    const preview = document.getElementById('preview');
+    const previewTitle = document.getElementById('previewTitle');
+    const previewText = document.getElementById('previewText');
+    const previewBtn = document.getElementById('previewBtn');
+    const openBtn = document.getElementById('openBtn');
+    const surprise = document.getElementById('surprise');
+    const messageText = document.getElementById('messageText');
+    const yesBtn = document.getElementById('yesBtn');
+    const noBtn = document.getElementById('noBtn');
+    const canvas = document.getElementById('confettiCanvas');
+
+    function updatePreview(){
+      const key = select.value || 'short';
+      const m = MESSAGES[key];
+      previewTitle.textContent = m.title;
+      previewText.textContent = m.text;
+    }
+    select.addEventListener('change', updatePreview);
+    previewBtn.addEventListener('click', () => { updatePreview(); });
+
+    openBtn.addEventListener('click', () => {
+      const key = select.value || 'short';
+      const m = MESSAGES[key];
+      messageText.textContent = m.text;
+      preview.style.display = 'none';
+      openBtn.style.display = 'none';
+      surprise.style.display = 'block';
+      surprise.animate([{ transform: 'scale(.96)', opacity:0 }, { transform: 'scale(1)', opacity:1 }], { duration:320, easing:'ease-out' });
+      launchConfetti(80);
+    });
+
+    const yesResponses = ["Yaaasss! 💖","Heck yes!","Absolutely, Muffin!","I'd love to! 😍","Best day ever! 🌸","Of course — forever & always!"];
+    yesBtn.addEventListener('click', () => {
+      yesBtn.textContent = yesResponses[Math.floor(Math.random()*yesResponses.length)];
+      yesBtn.disabled = true;
+      launchConfetti(160);
+      yesBtn.animate([{ transform:'scale(1)' },{ transform:'scale(1.06)' },{ transform:'scale(1)' }], { duration:420 });
+    });
+
+    // Make the No button silly on both mouse and touch:
+    function dodgeNoButton(){
+      const row = document.querySelector('.response-row');
+      const rowRect = row.getBoundingClientRect();
+      const btnRect = noBtn.getBoundingClientRect();
+      const padding = 8;
+      const maxLeft = Math.max(0, rowRect.width - btnRect.width - padding);
+      const maxTop = Math.max(0, rowRect.height - btnRect.height - padding);
+      const newLeft = Math.floor(Math.random() * (maxLeft+1));
+      const newTop = Math.floor(Math.random() * (maxTop+1));
+      noBtn.style.position = 'absolute';
+      noBtn.style.left = newLeft + 'px';
+      noBtn.style.top = newTop + 'px';
+      noBtn.animate([{ transform:'translateY(0)' },{ transform:'translateY(-6px)' },{ transform:'translateY(0)' }], { duration:200 });
+    }
+    noBtn.addEventListener('mouseenter', () => dodgeNoButton());
+    noBtn.addEventListener('touchstart', (e) => { e.preventDefault(); dodgeNoButton(); }, { passive:false });
+
+    noBtn.addEventListener('click', () => {
+      noBtn.textContent = "Oops, was that a joke? 😂";
+      noBtn.disabled = true;
+      setTimeout(() => { noBtn.textContent = "No... wait"; noBtn.disabled = false; noBtn.style.position = ''; noBtn.style.left=''; noBtn.style.top=''; }, 1200);
+    });
+
+    // Confetti (simple)
+    function launchConfetti(count = 60){
+      if(!canvas) return;
+      const ctx = canvas.getContext('2d');
+      resizeCanvas();
+      const w = canvas.width, h = canvas.height;
+      const colors = ["#FF6B9A","#FFB3C7","#FFD5E0","#FF9ACB","#FFDFEF","#8BD3A6"];
+      const pieces = [];
+      for(let i=0;i<count;i++){
+        pieces.push({
+          x: Math.random()*w,
+          y: -Math.random()*h*0.2,
+          vx: (Math.random()-0.5)*6,
+          vy: 2 + Math.random()*4,
+          size: 6 + Math.random()*10,
+          color: colors[Math.floor(Math.random()*colors.length)],
+          rot: Math.random()*360,
+          rotSpeed: (Math.random()-0.5)*8,
+          life: 60 + Math.random()*80
+        });
+      }
+      function tick(){
+        ctx.clearRect(0,0,w,h);
+        for(let i=pieces.length-1;i>=0;i--){
+          const p = pieces[i];
+          p.x += p.vx; p.y += p.vy; p.vy += 0.06; p.rot += p.rotSpeed; p.life--;
+          ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
+          ctx.fillStyle = p.color; ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size*0.6);
+          ctx.restore();
+          if(p.life<=0 || p.y>h+50) pieces.splice(i,1);
+        }
+        if(pieces.length>0) requestAnimationFrame(tick);
+        else ctx.clearRect(0,0,w,h);
+      }
+      tick();
+    }
+    function resizeCanvas(){ canvas.width = Math.max(window.innerWidth,800); canvas.height = Math.max(window.innerHeight,400); }
+    window.addEventListener('resize', resizeCanvas); resizeCanvas();
+
+    updatePreview();
+  </script>
+</body>
+</html>
